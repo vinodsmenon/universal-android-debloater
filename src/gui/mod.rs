@@ -4,7 +4,8 @@ pub mod widgets;
 
 pub use crate::core::sync::{get_device_list, Phone};
 pub use crate::core::uad_lists::Package;
-use crate::core::utils::icon;
+use crate::core::update::SelfUpdateState;
+use crate::core::utils::{get_latest_release, icon};
 use std::env;
 pub use views::about::{About as AboutView, Message as AboutMessage};
 pub use views::list::{List as AppsView, Message as AppsMessage};
@@ -136,7 +137,8 @@ impl Application for UadGui {
             }
             Message::AboutPressed => {
                 self.view = View::About;
-                Command::none()
+                self.settings_view.self_update_state = SelfUpdateState::default();
+                Command::perform(Self::send_self_update_message(), Message::SettingsAction)
             }
             Message::SettingsPressed => {
                 self.view = View::Settings;
@@ -300,6 +302,9 @@ impl UadGui {
     }
     pub async fn send_init_message() -> AppsMessage {
         AppsMessage::InitUadList(true)
+    }
+    pub async fn send_self_update_message() -> SettingsMessage {
+        SettingsMessage::GetLatestRelease(get_latest_release())
     }
 }
 
